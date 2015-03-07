@@ -37,4 +37,4 @@ The script uses NX-API to communicate with the switches. This is supported on th
 
 #Output
 The output of the script should look something like this.
-<image to be created>
+* image to be created
