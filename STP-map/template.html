@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Subnet graph for VLAN #VLAN</title>
+  </head>
+  <body>
+<script type="text/vnd.graphviz" id="data">
+#GRAPH
+</script>
+<script src="http://mdaines.github.io/viz.js/viz.js"></script>
+<script>
+      
+      function inspect(s) {
+        return "<pre>" + s.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;") + "</pre>"
+      }      
+      function example(id, format, engine) {
+        try {
+          return Viz(document.getElementById(id).innerHTML, format, engine);
+        } catch(e) {
+          return inspect(e.toString());
+        }
+      }
+      
+      document.body.innerHTML += "<h1>Spanning-tree for VLAN #VLAN at #TIME</h1>";
+      document.body.innerHTML += example("data", "svg");
+</script>
+<br>
+<br>
+<table>
+  <tr> <td><b>Legend</b></td></tr>
+  <tr>
+    <td>
+     <hr color="purple" size=3 width=40px>
+    </td>
+    <td>
+      Status Unknown
+    </td>
+  </tr>
+  <tr>
+    <td>
+     <hr color="red" size=3 width=40px>
+    </td>
+    <td>
+      Disabled or Disconnected
+    </td>
+  </tr>  
+  <tr>
+    <td>
+     <hr color="orange" size=3 width=40px>
+    </td>
+    <td>
+      Root or Designated Blocking
+    </td>
+  </tr> 
+  <tr>
+    <td>
+     <hr color="black" size=3 width=40px>
+    </td>
+    <td>
+      Blocking
+    </td>
+  </tr>  
+  <tr>
+    <td>
+     <hr color="yellow" size=3 width=40px>
+    </td>
+    <td>
+      Learning
+    </td>
+  </tr>  
+  <tr>
+    <td>
+     <hr color="blue" size=3 width=40px>
+    </td>
+    <td>
+      Forwarding
+    </td>
+  </tr>  
+  <tr>
+    <td>
+     <svg height="8" width="40">
+  <line x1="0" y1="3" x2="40" y2="3" style="stroke:rgb(0,0,0);" stroke-width="4" stroke-dasharray="5,2" />
+</svg> 
+    </td>
+    <td>
+      VPC (Any color)
+    </td>
+  </tr>  
+</table>
+<h2>Log Data:<br></h2><p>#LOG</p>
+  </body>
+</html>
