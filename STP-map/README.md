@@ -13,13 +13,13 @@ The scripts takes in a number of inputs
 
 Details on input:
 
-| Input     |     Description                                                                                                                                                    |
-|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -f <FILE>     | The file where the IP addresses are entered. IP addresses are to be entered one per line in the file. This option is optional and can be overriden with the override_hosts_string variable, though not recommended. |
-| -u <USER>       | The username for login. This can also be set via the STP_USER environment variable (recommended) or in the script via the override_switchuser variable. If not entered, the script will query for input. |
-| -p <PASSWORD>       | The password for login. This can also be set via the STP_PWD environment variable (recommeded) or in the script via the override_switchpassword variable. If not entered, the script will query for input. |
-| -v <VLAN>       | VLAN number to map. If not entered, it will default to 1. |
-| -V        | Verbose option. If used, raw JSON and all errors will be printed the final html output as well as via stdout. |
+| Input       |     Description                                                                                                                                                    |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -f FILE     | The file where the IP addresses are entered. IP addresses are to be entered one per line in the file. This option is optional and can be overriden with the override_hosts_string variable, though not recommended. |
+| -u  USER    | The username for login. This can also be set via the STP_USER environment variable (recommended) or in the script via the override_switchuser variable. If not entered, the script will query for input. |
+| -p PASSWORD | The password for login. This can also be set via the STP_PWD environment variable (recommeded) or in the script via the override_switchpassword variable. If not entered, the script will query for input. |
+| -v  VLAN    | VLAN number to map. If not entered, it will default to 1. |
+| -V          | Verbose option. If used, raw JSON and all errors will be printed the final html output as well as via stdout. |
 
 #Installation
 This script requires the requests and graphviz modules, all others should be included. This script is compatible with Python 2.7.
