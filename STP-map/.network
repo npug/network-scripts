@@ -3,6 +3,7 @@
     description: "Builds a STP topology and displays the details into a webpage"
 
     language: ["python"]
+    language_version: ["2.7"]
     operating_systems: ["linux", "windows"]
     license: ["apache"]
 
