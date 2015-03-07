@@ -12,8 +12,9 @@ The scripts takes in a number of inputs
 * Verbose option
 
 Details on input:
-| Input     |     Description                                             |
-|-----------|-------------------------------------------------------------|
+
+| Input     |     Description                                                                                                                                                    |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | -f        | The file where the IP addresses are entered. IP addresses are to be entered one per line in the file. This option is optional and can be overriden with the override_hosts_string variable, though not recommended. |
 | -u        | The username for login. This can also be set via the STP_USER environment variable (recommended) or in the script via the override_switchuser variable. If not entered, the script will query for input. |
 | -p        | The password for login. This can also be set via the STP_PWD environment variable (recommeded) or in the script via the override_switchpassword variable. If not entered, the script will query for input. |
