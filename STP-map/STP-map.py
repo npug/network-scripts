@@ -33,7 +33,7 @@ verbosity = False
 template_file = "template.html"  # assume local directory
 
 # disable annoying security messages - WARNING SSL certs NOT verified
-requests.packages.urllib3.disable_warnings()
+#requests.packages.urllib3.disable_warnings()
 
 # collection variables, collected via CLI argument
 log_output = ["Initialized.", ]
