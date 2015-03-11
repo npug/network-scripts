@@ -37,4 +37,5 @@ The script uses NX-API to communicate with the switches. This is supported on th
 
 #Output
 The output of the script should look something like this.
-* image to be created
+[hacky-lab-output-with-two-roots](https://raw.githubusercontent.com/npug/network-scripts/master/STP-map/images/STP-map-example-lab.PNG)
+* Note this is very hacky output from my lab where two 9k's are not connected and both think they are root. But now we know!
