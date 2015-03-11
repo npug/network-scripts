@@ -82,7 +82,7 @@ def return_array(jsondata):
     #  types. This makes parsing it, as it will always be an array
     if isinstance(jsondata, dict):
         return [jsondata]
-    elif isinstance(jsondata, []):
+    elif isinstance(jsondata, list):
         if len(jsondata) > 0:
             return jsondata
         else:
@@ -178,7 +178,7 @@ def intialize_inputs(arguments):
         add_to_log("INFO: Overriding the VLAN number, suggest "
                    "using input via CLI -v parameter")
     else:
-        inputs["vlan_num"] = arguments.vlan
+        inputs["vlan_num"] = arguments.vlan[0]  # we receive the vlan as a list
         if arguments.vlan == 1:
             add_to_log("WARNING: Using default VLAN of 1. Use -v parameter "
                        "or override_vlan_num to specify a different VLAN")
