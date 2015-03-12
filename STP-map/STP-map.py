@@ -212,41 +212,77 @@ def create_command_data(command, num):
 
 def build_urls(hosts, secure=True):
     # hosts is an array of IP addresses, returns nxapi url for addresses
-    if secure is True:
-        return ["https://"+host+"/ins/" for host in hosts]
-    else:
-        return ["http://"+host+"/ins/" for host in hosts]
+    if isinstance(hosts, list):
+        if secure is True:
+            return ["https://"+host+"/ins" for host in hosts]
+        else:
+            return ["http://"+host+"/ins" for host in hosts]
+    if isinstance(hosts, str):
+        if secure is True:
+            return "https://"+hosts+"/ins"
+        else:
+            return "http://"+hosts+"/ins"
 
 
-def get_response(payload, url, switchuser, switchpassword):
+
+def send_command(payload, url, switchuser, switchpassword):
     # attempts to collect the REST data from the selected URL
-    # credit to jeff@cisco.com for error handling
+    # credit to jeff@cisco.com for help on error handling
     # inputs: the payload is all the show commands in a single array (or entry)
     #         the URL is the IP https/http for the switch, and user/password
+    # returns:  "1" on failure
+    #           "SSLError" on SSL issues
+    #           "legacy_device" if the older NX-API version
+    #           JSON on success
     try:
-        return requests.post(url, data=json.dumps(payload), timeout=5,
-                             headers=myheaders,
-                             auth=(switchuser, switchpassword),
-                             verify=False).json()
+        postdata = requests.post(url, data=json.dumps(payload), timeout=5,
+                                 headers=myheaders,
+                                 auth=(switchuser, switchpassword),
+                                 verify=False)
+        # if the switch(or something else) accepts, but not 200 OK
+        if postdata.status_code == 200:
+            pass
+        elif postdata.status_code == 401:
+            add_to_log("ERROR: Invalid Username/password  on " + url)
+            return 1
+        elif postdata.status_code == 404:
+            add_to_log("ERROR: Invalid URL, 404 Not Found: " + url)
+            return 1
+        else:
+            add_to_log("ERROR: Received a " + str(postdata.status_code) +
+                       "from " + url)
+            return 1
+    # all the different ways this connection could fail:
     except requests.exceptions.InvalidURL:
         add_to_log("ERROR: Invalid URL" + url)
         return 1
-    except ValueError:
-        add_to_log("ERROR: Invalid Username/password combination on " + url)
-        return 1
+    except requests.exceptions.SSLError:
+        add_to_log("ERROR: SSL error on " + url)
+        return "SSLError"
     except requests.exceptions.ConnectionError:
-        add_to_log("ERROR: No Connection to " + url + "\nCheck for NXAPI "
-                   "support (Nexus 9000 and other Nexus Devices on 7.2+), and "
-                   "verify NXAPI feature is enabled:")
-        add_to_log("Example:\nSwitch#conf t\nSwitch(config)#feature nxapi\n")
+        add_to_log("ERROR: No Connection to " + url + "\nCheck IP Address and "
+                   "Check for NXAPI support (Nexus 9000 and other Nexus "
+                   "Devices on 7.2+), and verify NXAPI feature is enabled:"
+                   "Example:\nSwitch#conf t\nSwitch(config)#feature nxapi\n")
         return 1
     except requests.exceptions.Timeout:
-        add_to_log("ERROR: Switch is not reachable on " + url)
+        add_to_log("ERROR: Switch timed out on " + url)
         return 1
     except:
         add_to_log("ERROR: tried to retrieve command from " + url + ", failed")
-        add_to_log(str(sys.exc_info()[0]))
+        add_to_log("ERROR:" + str(sys.exc_info()[0]))
         return 1
+    # now let's make sure the output we received is actually JSON
+    try:
+        return postdata.json()
+    except ValueError:
+        # most likely XML output instead of JSON, and is an older device
+        if "Bad boy" in postdata.content:
+            return "legacy_device"
+        else:
+            add_to_log("ERROR: Could not format JSON back from " + url)
+            return 1
+    return 1
 
 
 def interface_state(interface_name, interface_status_output):
@@ -494,6 +530,32 @@ def buildtopology(stp_output, hostname_output, cdp_output, interface_status_outp
     return topology
 
 
+def get_response(payload, url, switchuser, switchpassword, host):
+    response_data = send_command(payload, url, switchuser, switchpassword)
+    if response_data == 1 or response_data is None:
+        # there was an error in getting commands, break
+        add_to_log("ERROR: Collecting show commands failed from host: "
+                   + str(host))
+        return 1
+    elif response_data == "legacy_device":
+        add_to_log("ERROR: Host " + host + " is on an older NXAPI release,"
+                   " please upgrade for compatibility")
+        return 1
+    elif response_data == "SSLError":
+        http_url = build_urls(host, secure=False)
+        add_to_log("ERROR: Trying HTTP instead of HTTPS on " + http_url)
+        response_data = get_response(payload, http_url, switchuser,
+                                     switchpassword, host)
+        if response_data == 1 or response_data is None:
+            # there was an error in getting commands, break
+            add_to_log("ERROR: Failed attempting fallback to HTTP for host: "
+                       + str(host))
+            return 1
+        else:
+            return response_data
+    return response_data
+
+
 def create_topology(arg_inputs):
     # this function is the master function for building the json data for the
     # topology. it sets the topology as array of dictionaries with unique keys
@@ -502,26 +564,36 @@ def create_topology(arg_inputs):
     # intermediary variables
     payload = []
     topo_array = []
-    # build http URLs for our hosts.
-    urls = build_urls(arg_inputs["hosts_string"])
+
+    vlan_num = arg_inputs["vlan_num"]
+    switchuser = arg_inputs["switchuser"]
+    switchpassword = arg_inputs["switchpassword"]
+    hosts_string = arg_inputs["hosts_string"]
+    commands = command_array(vlan_num)
+
     # build a REST request for each command in the command array
-    for i, x in enumerate(command_array(arg_inputs["vlan_num"])):
+    for i, x in enumerate(commands):
         payload.extend(create_command_data(x, i))
+
+    if len(hosts_string) == 0:
+        add_to_log("ERROR: No devices provided")
+
+    # build http URLs for our hosts, try HTTPS first
+    urls = build_urls(hosts_string, secure=True)
     # assign variables for each of the outputs of the show commands
     # then loop through our hosts and commands and feed that into the
     # topology builder
-    if len(arg_inputs["hosts_string"]) == 0:
-        add_to_log("ERROR: No devices provided")
-    for host, url in zip(arg_inputs["hosts_string"], urls):
-        response_data = get_response(payload, url, arg_inputs["switchuser"], arg_inputs["switchpassword"])
-        if response_data == 1:
-            # there was an error in getting commands, break
-            add_to_log("ERROR: Collecting show commands failed")
+    for host, url in zip(hosts_string, urls):
+        response_data = get_response(payload, url, switchuser,
+                                     switchpassword, host)
+        if response_data == 1 or response_data is None or \
+           response_data == "legacy_device":
             continue
-        else:
-            stp_o, hostname_o, cdp_o, intstatus_o, portchannel_o, vpc_o = response_data
+
+        # unpack the outputs from the array of commands we passed to the switch
+        stp_o, hostname_o, cdp_o, intstatus_o, portchannel_o, vpc_o = response_data
         new_topo = (buildtopology(stp_o, hostname_o, cdp_o, intstatus_o,
-                                  portchannel_o, vpc_o, host))
+                    portchannel_o, vpc_o, host))
         # check for duplicate hostnames across the array
         for thekey in new_topo:  # in case of empty array
             if thekey == []:
