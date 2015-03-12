@@ -539,7 +539,7 @@ def get_response(payload, url, switchuser, switchpassword, host):
         return 1
     elif response_data == "legacy_device":
         add_to_log("ERROR: Host " + host + " is on an older NXAPI release,"
-                   " please upgrade for compatibility")
+                " please upgrade to 6.1(2)I2(3) or higher for compatibility")
         return 1
     elif response_data == "SSLError":
         http_url = build_urls(host, secure=False)

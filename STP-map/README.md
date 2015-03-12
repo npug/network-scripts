@@ -33,7 +33,7 @@ python network-scripts/STP-map/STP-map.py -f <device file> -v <VLAN> -u <USERNAM
 ````
 
 #Compatibility
-The script uses NX-API to communicate with the switches. This is supported on the Nexus 9300 and 9500 code, and other Nexus code with NX-API support (NX-OS 7.2+). It has been tested on Ubuntu and Windows
+The script uses NX-API to communicate with the switches. This is supported on the Nexus 9300 and 9500 code, and other Nexus code with NX-API support (NX-OS 7.2+). On the Nexus 9000 it requires 6.1(2)I2(3) or higher code. It has been tested on Ubuntu and Windows
 
 #Output
 The output of the script should look something like this.
