@@ -12,6 +12,7 @@ Scripts:
 | Script                    |    Description                                                                                                                  |
 |---------------------------|---------------------------------------------------------------------------------------------------------------------------------|
 | STP-map:                  | A NXAPI script that will create a topology map of the STP instance on a VLAN and open the map in a browser. |
+| router-login              | This example script will launch an ssh session to an IP provided by the user, grab a list of interfaces and then print out their configurations.       |
 | More to come              | Contact nicmatth@cisco.com to add your script |
 
 More to come on scripts.
