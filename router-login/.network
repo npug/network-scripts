@@ -1,0 +1,26 @@
+{
+    description: "Grab a list of interfaces for a device then look at their running configuration.",
+
+    language: ["python"],
+    operating_systems: ["linux"],
+
+    author: "Stefano Pirrello",
+    author_email: "spirrello@gmail.com",
+
+    vendors: ["cisco"],
+    products: ["ASR", "ISR G2", "n7000","n5000","Catalyst 3850", "Catalyst 2960"],
+    access_method: ["ssh via paramiko"],
+    device_protocol: ["none"],
+
+    # Best guess of how much of a 'hack' the script is
+    language_bestpractices: .5,
+    # What percentage of reasonable features are implemented
+    completeness: .4,
+
+    # Best guess of security best practices and methods
+    security_level: .1,
+
+    # Best guess of how many failure scenarios have been tested
+    test_coverage: .0,
+
+}
