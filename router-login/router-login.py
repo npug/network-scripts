@@ -4,7 +4,6 @@ import getpass
 import time
 import re
 import os
-import datetime
 
 
 #including this snippet will automatically accept the host keys on ssh requests.
@@ -25,6 +24,7 @@ client.load_host_keys(os.path.expanduser('~/.ssh/known_hosts'))
 client.set_missing_host_key_policy(AllowAllKeys())
 client.connect(ip_addr, username=username, password=password, timeout=7,allow_agent=False,look_for_keys=False)
 chan = client.invoke_shell()
+chan.settimeout(None)
 ########################################
 
 print "logging into the device now....."
@@ -33,14 +33,19 @@ time.sleep(1)
 chan.send('term len 0\n')
 time.sleep(1)
 chan.send('sh run\n')
-time.sleep(15)
+time.sleep(30)
 #The following statement will grab the output from the ssh connection.
-output = chan.recv(10000000)
+if chan.recv_ready():
+    output = chan.recv(1250000)
 
 print "extracting the interfaces now...."
-#We now want to find all interfaces configured on the router.  Be cautious, if you have any NAT, EEM or other random interface
-#statements they will be captured in the following regex.  You might need to fine tune the regex code to suite your needs.
-s =  re.findall('interface.*',output)
+#We now want to find all interfaces configured on the router.  You might need to fine tune the regex code to suite your needs.
+#The following regex statement will grab only the interface statements and will leave out the other parameters
+#beyond the port numbers.
+s =  re.findall('interface.*[A-Za-z]*/*.[0-9$]',output)
+
+#remove any duplicates found from sub configurations....config the list to a set then back to a list
+s = list(set(s))
 print "Printing the interfaces found:"
 for x in s:
 	print x
@@ -52,16 +57,11 @@ output = ""
 print "printing out the interface configurations...."
 #Print out the running configuration of the interfaces found.
 for x in s:
-    # stdin,stdout,stderr = chan.send("sh run " + x + "\n")
     chan.send("sh run " + x + "\n")
     time.sleep(1)
-    output = output + chan.recv(9999)
-    #output = output + chan.recv(10000000)
+    
+output = chan.recv(1250000)
 print output
-outputfile = "router-output" + str(time.strftime("%Y-%m-%d-%H:%M:%S"))
-#output = chan.recv(10000000)
-text_file = open(outputfile, "a")
-text_file.write(output)
-text_file.close()
+
 chan.send('exit\n')
 chan.close()
